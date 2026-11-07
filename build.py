@@ -9,6 +9,7 @@ Media placeholders use media('note for Sebastian') and render as blank boxes.
 import html, os, re, glob
 
 SITE = 'Discord for School'
+TITLE = "Discord for College: Desktop App Version"
 
 # ---------------------------------------------------------------------------
 # New words (blue text + hover definition). Also used to build the Glossary.
@@ -81,16 +82,13 @@ def media(todo, small=False):
 
 # Alt text for media that is ready, keyed by label (subsection number + position)
 MEDIA = {
-    '1.3.1': 'This tutorial open in a web browser on the left half of the screen and Discord open on the right half',
-    '2.1.1': 'The Discord download page with the Download for Windows button',
-    '2.1.2': 'The Discord login screen that appears after the installation finishes',
-    '2.2.1': 'Accessing the create an account form after clicking register on the login screen',
-    '2.2.2': 'The Discord home screen after signing up, with a green bar at the top asking you to verify your email',
-    '2.2.3': 'Opening the verification email and clicking Verify Email',
-    '2.3.1': 'The user panel at the bottom left, with the gear icon to the right of the microphone and headphone buttons',
-    '2.3.2': 'Uploading and cropping an avatar and adding pronouns in Edit Profiles',
-    '2.3.3': 'Opening Language & Time in User Settings and selecting Español, LATAM',
-    '2.3.4': 'The Text size in chat slider under Text Readability in the Accessibility settings',
+    '1.3.4': 'This tutorial open in a web browser on the left half of the screen and Discord open on the right half',
+    '2.1.2': 'The Discord download page with the Download for Windows button',
+    '2.2.2': 'Accessing the create an account form after clicking register on the login screen',
+    '2.2.10': 'The Discord home screen after signing up, with a green bar at the top asking you to verify your email',
+    '2.2.13': 'Opening the verification email and clicking Verify Email',
+    '2.3.2': 'The user panel at the bottom left, with the gear icon to the right of the microphone and headphone buttons',
+    '2.3.16': 'The Text size in chat slider under Text Readability in the Accessibility settings',
 }
 
 
@@ -120,14 +118,18 @@ def number_media(body, num):
 
 
 def steps(*items):
-    """Numbered steps. An item may be a string or (string, media_html)."""
+    """Numbered steps. Every step gets its own media spot: step text on the left, media on the right."""
     out = []
     for it in items:
-        if isinstance(it, tuple):
-            out.append(f'<li>{it[0]}{it[1]}</li>')
-        else:
-            out.append(f'<li>{it}</li>')
-    return '<ol class="steps">' + ''.join(out) + '</ol>'
+        text = it[0] if isinstance(it, tuple) else it
+        todo = re.sub(r'<[^>]+>', '', text)
+        out.append(f'<li><div class="step-text">{text}</div><div class="step-media">{media("Step: " + todo)}</div></li>')
+    return '<ol class="steps steps-grid">' + ''.join(out) + '</ol>'
+
+
+def explain():
+    """Spot for a short paragraph that explains a figure before it is shown (to be written by Sebastian)."""
+    return '<p class="placeholder-text explain">Explanatory paragraph will go here</p>'
 
 
 def result(h):
@@ -147,8 +149,8 @@ def kbd(k):
 # Subsection: (number, file, title, summary)
 # ---------------------------------------------------------------------------
 SECTIONS = [
-    ('1', 'index.html', 'Introduction', 'What Discord is, who this tutorial is for, and how to use it.', [
-        ('1.1', 'what-is-discord.html', 'What Discord Is and Why Your Group Uses It', 'A plain description of Discord and why classes and clubs use it.'),
+    ('1', 'index.html', 'Introduction: What Discord Is and Why Your Group Uses It', 'What Discord is and why classes and clubs use it.', [
+        ('1.1', 'about-this-tutorial.html', 'About This Tutorial', 'What you will be able to do and what you need before you begin.'),
         ('1.2', 'who-this-is-for.html', 'Who This Tutorial Is For', 'The skills, equipment, and time you need before you start.'),
         ('1.3', 'how-to-use.html', 'How to Use This Tutorial', 'How the pages, steps, notes, and new words work.'),
     ]),
@@ -177,11 +179,6 @@ SECTIONS = [
         ('6.1', 'notifications.html', 'Controlling Notifications', 'Keep important alerts and silence the rest.'),
         ('6.2', 'privacy-security.html', 'Protecting Your Privacy and Account', 'Limit who can contact you and secure your login.'),
     ]),
-    ('7', 'glossary.html', 'Glossary', 'Every new word in this tutorial, defined in plain language.', []),
-]
-
-# Sections removed for now (restore by moving them back into SECTIONS before the Glossary):
-HIDDEN_SECTIONS = [
     ('7', 'voice-and-screen.html', 'Joining Voice Calls and Sharing Your Screen', 'Attend group meetings and present your work.', [
         ('7.1', 'voice-video.html', 'Joining a Voice Channel and Turning On Video', 'Connect, mute, disconnect, and use your camera.'),
         ('7.2', 'screen-share.html', 'Sharing Your Screen', 'Present one window or your entire screen.'),
@@ -196,6 +193,7 @@ HIDDEN_SECTIONS = [
         ('9.2', 'channel-invite-problems.html', 'Channel and Invite Problems', 'Fix missing channels and expired invites.'),
         ('9.3', 'getting-help.html', 'Getting More Help', 'Ask your server for help the right way.'),
     ]),
+    ('10', 'glossary.html', 'Glossary', 'Every new word in this tutorial, defined in plain language.', []),
 ]
 
 # Flat reading order for previous / next links
@@ -243,7 +241,8 @@ def page(filename, body, description, draft=False):
     pager += '</nav>'
     draft_banner = (f'<p class="draft">This {"section" if parent is None else "subsection"} is unfinished.</p>'
                     if draft else '')
-    doc_title = f'{title} | {SITE}' if filename != 'index.html' else f'{SITE}: A Beginner\'s Tutorial for Discord on Windows'
+    heading = f'{num}. {title}' if parent is None else f'{num} {title}'
+    doc_title = f'{heading} | {TITLE}' if filename != 'index.html' else TITLE
     return f'''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -261,19 +260,18 @@ def page(filename, body, description, draft=False):
 <a class="skip-link" href="#main">Skip to content</a>
 <div class="shell">
   <aside class="sidebar" id="sidebar" aria-label="Table of Contents">
-    <a class="brand" href="index.html"><span class="brand-mark">{LOGO}</span><span>{SITE}<small>Discord for Windows Tutorial</small></span></a>
+    <a class="brand" href="index.html"><span class="brand-mark">{LOGO}</span><span>{TITLE}</span></a>
     <h2 class="toc-title">Table of Contents</h2>
     <nav aria-label="Table of Contents">{sidebar(filename)}</nav>
   </aside>
   <div class="main-col">
     <header class="topbar">
       <button class="toc-toggle" aria-expanded="false" aria-controls="sidebar">{ICON['menu']}<span>Table of Contents</span></button>
-      <span class="topbar-title">{SITE}</span>
+      <span class="topbar-title">{TITLE}</span>
     </header>
     <main id="main" class="content">
       <nav class="crumbs" aria-label="Breadcrumb">{crumbs}</nav>
-      <p class="kicker">{label}</p>
-      <h1>{title}</h1>
+      {f'<h1>{TITLE}</h1><p class="section-label">{heading}</p>' if filename == 'index.html' else f'<h1>{heading}</h1>'}
       {draft_banner}
 {body}
 {pager}
@@ -297,36 +295,10 @@ def overview(num):
 PAGES = {}
 
 # ===========================================================================
-# SECTION 1  INTRODUCTION (homepage)
+# SECTION 1  INTRODUCTION (homepage: What Discord Is)
 # ===========================================================================
-PAGES['index.html'] = ('Learn the Discord desktop app for your class or group project, one short section at a time.', f'''
-<p class="lead">Your group says everything is on Discord, but you are not sure where to look. This tutorial will teach you how to use the Discord {T('desktop app')} for a class or group project, from creating your account to joining your group's meetings.</p>
-
-<p><a href="https://discord.com">Discord</a> is a free app, made by Discord Inc., for typed chat, voice calls, video calls, and file sharing. You can use Discord on a computer, in a web browser, or on a phone. This tutorial covers <strong>only the desktop app for Windows</strong>, so every step and every picture matches what you see on your computer screen.</p>
-
-<h2>What you will be able to do</h2>
-<ul>
-  <li>Create an account and set up a profile your teammates recognize</li>
-  <li>Join your group's server and find the right channels</li>
-  <li>Send messages, reply, and share files</li>
-  <li>Find deadlines and meeting changes you missed</li>
-  <li>Join voice meetings and share your screen</li>
-</ul>
-
-<h2>Before you begin</h2>
-<table class="facts">
-  <tr><th scope="row">Skill level</th><td>You only need to be comfortable with email, a web browser and messaging apps.</td></tr>
-  <tr><th scope="row">You need</th><td>A Windows 10 or 11 PC, an internet connection, and an email address you can access</td></tr>
-  <tr><th scope="row">Voice/Video Calls</th><td>A microphone and speakers or headphones. A webcam is optional.</td></tr>
-</table>
-
-<h2>Start here</h2>
-<p>Read the three parts of this introduction first, or go straight to <a href="getting-started.html">Section 2: Creating Your Account</a> if you are ready to install Discord.</p>
-{overview('1')}
-''')
-
-PAGES['what-is-discord.html'] = ('What Discord is and why classes and clubs use it.', f'''
-<p class="lead">Discord is a free app that keeps a group's messages, files, and meetings in one place. This page explains how Discord is organized and why your group chose it.</p>
+PAGES['index.html'] = ('Learn what Discord is and why your class or group uses it, then learn the Discord desktop app one short section at a time.', f'''
+<p class="lead"><a href="https://discord.com">Discord</a> is a free app that keeps a group's messages, files, and meetings in one place. This page explains how Discord is organized and why your group chose it.</p>
 
 <h2>What Discord does</h2>
 <p>Discord combines three tools that groups usually keep separate:</p>
@@ -347,6 +319,33 @@ PAGES['what-is-discord.html'] = ('What Discord is and why classes and clubs use 
 </ul>
 
 {note('Discord is also popular for gaming, but you do not need any gaming experience. A school server only contains the channels your group creates.')}
+
+<h2>Start here</h2>
+<p>Read the three parts of this introduction first, or go straight to <a href="getting-started.html">Section 2: Creating Your Account</a> if you are ready to install Discord.</p>
+{overview('1')}
+''')
+
+PAGES['about-this-tutorial.html'] = ('What this tutorial teaches and what you need before you begin.', f'''
+<p class="lead">Your group says everything is on Discord, but you are not sure where to look. This tutorial will teach you how to use the Discord {T('desktop app')} for a class or group project, from creating your account to joining your group's meetings.</p>
+
+<p>You can use Discord on a computer, in a web browser, or on a phone. This tutorial covers <strong>only the desktop app for Windows</strong>, so every step and every picture matches what you see on your computer screen.</p>
+
+<h2>What you will be able to do</h2>
+<ul>
+  <li>Create an account and set up a profile your teammates recognize</li>
+  <li>Join your group's server and find the right channels</li>
+  <li>Send messages, reply, and share files</li>
+  <li>Find deadlines and meeting changes you missed</li>
+  <li>Join voice meetings and share your screen</li>
+</ul>
+
+<h2>Before you begin</h2>
+<table class="facts">
+  <tr><th scope="row">Skill level</th><td>You only need to be comfortable with email, a web browser and messaging apps.</td></tr>
+  <tr><th scope="row">You need</th><td>A Windows 10 or 11 PC, an internet connection, and an email address you can access</td></tr>
+  <tr><th scope="row">Voice/Video Calls</th><td>A microphone and speakers or headphones. A webcam is optional.</td></tr>
+</table>
+
 ''')
 
 PAGES['who-this-is-for.html'] = ('The audience, skills, equipment, and time this tutorial expects.', f'''
@@ -385,15 +384,15 @@ PAGES['how-to-use.html'] = ('How the pages, numbered steps, notes, cautions, and
 {steps(
     'Open this tutorial in your web browser.',
     f'Press {kbd("Windows key")} + {kbd("Left Arrow")} to move the browser to the left half of the screen.',
-    f'Open Discord and press {kbd("Windows key")} + {kbd("Right Arrow")} to move it to the right half of the screen.',
+    'Open the Discord app.',
+    f'Press {kbd("Windows key")} + {kbd("Right Arrow")} to move Discord to the right half of the screen.',
 )}
-{media('GIF of the browser and Discord snapping side by side')}
 
 <h2>How each page is written</h2>
 <ul>
   <li><strong>Numbered steps</strong> tell you one action at a time. Complete them in order.</li>
   <li><strong>Bold words</strong> such as {ui('Continue')} match the buttons and menu names on your screen.</li>
-  <li><strong>Pictures, GIFs, and short videos</strong> appear right after the steps they show.</li>
+  <li><strong>Pictures</strong> appear next to each step they show.</li>
   <li><strong>Blue words</strong>, such as {T('server')}, are new words. Point to them to see the definition.</li>
 </ul>
 
@@ -408,7 +407,7 @@ PAGES['how-to-use.html'] = ('How the pages, numbered steps, notes, cautions, and
 # SECTION 2  GETTING STARTED
 # ===========================================================================
 PAGES['getting-started.html'] = ('Install the Discord desktop app and create your account.', f'''
-<p class="lead">Nothing else in this tutorial works until you have an account, so this section comes first. You will install the {T('desktop app')}, create your account, and set up a profile your teammates recognize.</p>
+<p class="lead">In this section, you will install the {T('desktop app')}, create your account, and set up a profile your teammates recognize.</p>
 <p><strong>You need:</strong> your computer and an email address you can check.</p>
 {overview('2')}
 ''')
@@ -424,7 +423,6 @@ PAGES['download-app.html'] = ('Download and install the Discord desktop app on W
     'Wait while Discord installs. The app opens on its own when it finishes.',
 )}
 {result('The Discord login screen appears, and a Discord shortcut is added to your Start menu.')}
-{media('GIF of DiscordSetup.exe installing and the login screen opening')}
 
 {caution('Download Discord only from discord.com. Copies offered on other websites can contain harmful software.')}
 ''')
@@ -453,7 +451,8 @@ PAGES['sign-up.html'] = ('Register for a Discord account, choose your names, and
     f'Complete the {T("CAPTCHA")} puzzle, such as checking the box next to <strong>I am human</strong>.',
 )}
 {result('Discord opens to your home screen, and a verification email is sent to your inbox.')}
-{media('Video walkthrough of the full registration form')}
+<p>Congratulations! Your Discord is installed and logged in, yours should appear as shown below.</p>
+{media('Home screen after signing up')}
 
 <h2>Verify your email address</h2>
 <p>Discord will not let you join some servers until you verify your email address.</p>
@@ -481,16 +480,17 @@ PAGES['profile-settings.html'] = ('Add an avatar and pronouns, switch Discord to
 <p>Your {T('avatar')} appears next to every message you send. A clear photo of your face or a simple image helps teammates match your messages to you. Adding your pronouns helps teammates know how to refer to you.</p>
 {steps(
     f'In User Settings, click {ui("Edit Profiles")}.',
-    f'Click on your {ui("Avatar")}.',
-    f'Click {ui("Upload Image")} and choose a picture from your computer.',
-    f'Drag the picture to adjust the crop, and then click {ui("Apply")}.',
+    f'Click on your {ui("Avatar")}, and then click the {ui("Change Avatar")} button.',
+    f'Click {ui("Upload Image")}.',
+    'Choose a picture from your computer.',
+    'Drag the picture or use the buttons below to adjust the crop.',
+    f'Click {ui("Apply")}.',
     f'Click {ui("Save Changes")} at the bottom of the window.',
     f'Click the area that says {ui("Add pronouns")}, next to your username.',
     'Type your preferred pronouns, such as <strong>He/Him</strong>.',
     f'Click {ui("Save Changes")}.',
 )}
 {result('Your new picture appears in the bottom-left corner next to your name, and your pronouns appear on your profile card.')}
-{media('GIF of uploading and cropping a profile picture')}
 
 <h2>Change the display language</h2>
 <p>You can switch every menu and button in Discord to another language, such as Spanish. Messages from your group stay in the language they were written in.</p>
@@ -499,7 +499,6 @@ PAGES['profile-settings.html'] = ('Add an avatar and pronouns, switch Discord to
     f'Click the language you want, such as {ui("Español, LATAM")}.',
 )}
 {result('Discord changes language right away. No restart is needed.')}
-{media('Your screenshot of the Language list with Español, LATAM selected', True)}
 {note('This tutorial uses the English names of buttons. If you change the language, switch it back to English while you work through the steps, or keep this tutorial open beside Discord to match the button positions.')}
 
 <h2>Make text larger</h2>
@@ -509,7 +508,6 @@ PAGES['profile-settings.html'] = ('Add an avatar and pronouns, switch Discord to
     'Drag the slider to the right until messages are comfortable to read.',
 )}
 {result('Messages in every channel use the larger size.')}
-{media('Your screenshot of the Chat Font Scaling slider moved to a larger size', True)}
 {note(f'To make everything in Discord larger, including menus, press {kbd("Ctrl")} + {kbd("+")}. Press {kbd("Ctrl")} + {kbd("0")} to return to normal size.')}
 ''')
 
@@ -547,12 +545,9 @@ PAGES['accept-invite.html'] = ('Join a Discord server from an invite link on you
 <h2>Join by clicking the link</h2>
 {steps(
     'Make sure you are logged in to the Discord desktop app.',
-    'Click the invite link in the email or message your group sent.',
-    (f'When your web browser opens the invite page, click {ui("Accept Invite")}.', media('Your screenshot of the Accept Invite screen showing the server name', True)),
-    f'If your browser asks whether to open Discord, click {ui("Open Discord")}.',
+    f'Click the {ui("Join")} button on the invite link your group sent.',
 )}
 {result('Discord opens to the new server, and its icon appears in the column on the far left.')}
-{media('GIF of clicking an invite link and landing in the server')}
 
 <h2>Join by pasting the link</h2>
 <p>If clicking the link does not open the server, paste the link into Discord yourself.</p>
@@ -564,7 +559,6 @@ PAGES['accept-invite.html'] = ('Join a Discord server from an invite link on you
     f'Click {ui("Join Server")}.',
 )}
 {result('The new server opens, and its icon appears in the server column.')}
-{media('Video of pasting an invite link into the Join a Server window')}
 
 {caution('If Discord says the invite is invalid or expired, ask your group for a new link. Invite links can be set to stop working after a certain time or number of uses.')}
 ''')
@@ -574,14 +568,12 @@ PAGES['server-nickname.html'] = ('Set a server nickname so you use your full nam
 
 <h2>Set your server nickname</h2>
 {steps(
-    'Click the server\'s icon in the column on the far left.',
-    (f'Click the server name at the top of the channel column.', media('Your screenshot of the server name menu opened at the top of the channel column', True)),
-    f'Click {ui("Edit Per-server Profile")}.',
-    f'Type your full name in the {ui("Server Nickname")} box.',
+    'Click your profile in the member list.',
+    f'Click {ui("Edit Profile")}, and then click {ui("Edit Per-server Profile")}.',
+    f'Type your nickname in the {ui("Display Name")} box.',
     f'Click {ui("Save Changes")}.',
 )}
 {result('Your new nickname appears next to your messages in this server. Your name in all other servers stays the same.')}
-{media('GIF of changing a server nickname and seeing the new name in the chat')}
 
 {note('Some servers do not allow members to change their own nickname. If you do not see the option, ask a server moderator to set it for you.')}
 ''')
@@ -597,31 +589,35 @@ PAGES['discord-layout.html'] = ('A guided tour of the Discord desktop window fro
 
 PAGES['four-areas.html'] = ('The server list, channel list, chat area, and member list in the Discord desktop app.', f'''
 <p class="lead">The Discord window is divided into four main areas. Read them from left to right.</p>
-{media('Large labeled screenshot of the full Discord window with the four areas numbered 1 to 4')}
 
 <h2>1. Server list</h2>
 <p>The {T('server list')} is the narrow column of round icons on the far left. Each icon is a server you belong to. The Discord logo at the top opens your private messages, which <a href="messages.html">Subsection 5.1</a> explains.</p>
+{media('Server list')}
 
 <h2>2. Channel list</h2>
 <p>The {T('channel list')} shows every channel in the server you selected. The server name appears at the top. Channels are grouped under headings called {T('category', 'categories')}.</p>
+{media('Channel list')}
 
 <h2>3. Chat area</h2>
 <p>The {T('chat area')} in the center shows the messages in the channel you selected. The newest messages are at the bottom, and the box for typing your own message is below them.</p>
+{media('Chat area')}
 
 <h2>4. Member list</h2>
 <p>The {T('member list')} on the right shows who belongs to the server. Members who are online appear at the top.</p>
+{media('Member list')}
 {note('If you do not see the member list, click the icon of two people at the top-right of the window to show or hide it.')}
 ''')
 
 PAGES['channels.html'] = ('How to tell text channels and voice channels apart in Discord.', f'''
 <p class="lead">Every server has two main kinds of channels. You can tell them apart by the icon in front of each channel name.</p>
-{media('Your screenshot of a channel list showing text channels and voice channels, with the # and speaker icons circled')}
 
 <h2>Text channels</h2>
 <p>A {T('text channel')} has a pound sign (<strong>#</strong>) in front of its name, such as <strong>#announcements</strong>. Text channels are for typed messages, links, and files. Click a text channel to read it.</p>
+{media('Text channels with the # icon')}
 
 <h2>Voice channels</h2>
 <p>A {T('voice channel')} has a speaker icon in front of its name, such as <strong>Meeting Room</strong>. Voice channels are for live talking, video, and screen sharing.</p>
+{media('Voice channels with the speaker icon')}
 {caution('Clicking a voice channel connects you to it immediately, and the other people in it may hear your microphone. Click a voice channel only when you are ready to talk.')}
 
 <h2>Bold and gray channel names</h2>
@@ -666,14 +662,14 @@ PAGES['messages.html'] = ('Type, edit, reply to, and react to messages, and use 
     f'Press {kbd("Enter")} to send it.',
 )}
 {result('Your message appears at the bottom of the chat area for everyone in the channel.')}
-{media('GIF of typing and sending a message in a text channel')}
 {note(f'To start a new line without sending, press {kbd("Shift")} + {kbd("Enter")}.')}
 
 <h2>Edit a message you sent</h2>
 {steps(
     'Hold your pointer over your message.',
     'Click the pencil icon that appears on the right.',
-    f'Change the text and press {kbd("Enter")}.',
+    'Change the text.',
+    f'Press {kbd("Enter")}.',
 )}
 {result('The message updates and shows <strong>(edited)</strong> next to it.')}
 
@@ -682,7 +678,8 @@ PAGES['messages.html'] = ('Type, edit, reply to, and react to messages, and use 
 {steps(
     'Hold your pointer over the message you want to answer.',
     (f'Click the {ui("Reply")} arrow on the right.', media('Your screenshot of the hover menu with the Reply arrow circled', True)),
-    f'Type your answer and press {kbd("Enter")}.',
+    'Type your answer.',
+    f'Press {kbd("Enter")}.',
 )}
 
 <h2>React to a message</h2>
@@ -692,7 +689,6 @@ PAGES['messages.html'] = ('Type, edit, reply to, and react to messages, and use 
     f'Click the smiley face icon ({ui("Add Reaction")}).',
     'Click an emoji, such as a thumbs up.',
 )}
-{media('GIF of adding a thumbs up reaction under an announcement', True)}
 
 <h2>Send a direct message</h2>
 <p>A {T('direct message')} (DM) is a private conversation outside the server channels.</p>
@@ -702,17 +698,17 @@ PAGES['messages.html'] = ('Type, edit, reply to, and react to messages, and use 
     f'Press {kbd("Enter")}.',
 )}
 {result('A private conversation opens. To find it later, click the Discord logo at the top of the server list.')}
-{media('Your screenshot of a profile card with the message box circled', True)}
 
 <h2>Start a thread</h2>
 <p>A {T('thread')} keeps a long side discussion about one message out of the main channel.</p>
 {steps(
     'Hold your pointer over the message you want to discuss.',
-    f'Click the three dots ({ui("More")}) and then click {ui("Create Thread")}.',
+    f'Click the three dots ({ui("More")}).',
+    f'Click {ui("Create Thread")}.',
     'Type a short name for the thread.',
-    f'Type your first message and press {kbd("Enter")}.',
+    'Type your first message.',
+    f'Press {kbd("Enter")}.',
 )}
-{media('GIF of creating a thread from a message')}
 ''')
 
 PAGES['mentions.html'] = ('Mention a teammate, a role, or the whole server in Discord.', f'''
@@ -723,7 +719,8 @@ PAGES['mentions.html'] = ('Mention a teammate, a role, or the whole server in Di
     'In the message box, type <strong>@</strong>.',
     'Type the first few letters of your teammate\'s name.',
     (f'Click their name in the list that appears.', media('Your screenshot of the @ suggestion list above the message box', True)),
-    f'Finish your message and press {kbd("Enter")}.',
+    'Finish typing your message.',
+    f'Press {kbd("Enter")}.',
 )}
 {result('Your teammate receives a notification, and the message is highlighted for them.')}
 {note('When someone mentions you, the message has a yellow highlight and a yellow bar on its left edge, so you can spot it while scrolling.')}
@@ -759,7 +756,6 @@ PAGES['missed-messages.html'] = ('Catch up on missed Discord messages with unrea
     f'Click the {ui("Mentions")} tab.',
     f'Click {ui("Jump")} next to a message to open it in its channel.',
 )}
-{media('GIF of opening the Inbox and jumping to a mention')}
 
 <h2>Check pinned messages</h2>
 <p>Groups often save deadlines and meeting links as a {T('pinned message', 'pinned message')}.</p>
@@ -768,7 +764,6 @@ PAGES['missed-messages.html'] = ('Catch up on missed Discord messages with unrea
     'Click the pin icon at the top-right of the window.',
     f'Click {ui("Jump")} next to a pinned message to see it in the conversation.',
 )}
-{media('Your screenshot of the pinned messages list in a channel', True)}
 
 <h2>Search for a message</h2>
 {steps(
@@ -778,7 +773,6 @@ PAGES['missed-messages.html'] = ('Catch up on missed Discord messages with unrea
     'Click a result to jump to that message.',
 )}
 {note('To search for messages from one person, type <strong>from:</strong> in the Search box, and then pick the person from the list.')}
-{media('GIF of searching for the word deadline and opening a result')}
 ''')
 
 PAGES['files.html'] = ('Upload files to Discord and find shared files later.', f'''
@@ -787,24 +781,25 @@ PAGES['files.html'] = ('Upload files to Discord and find shared files later.', f
 <h2>Upload a file</h2>
 {steps(
     'Open the channel where your group shares files, such as #files-and-drafts.',
-    (f'Click the plus button on the left side of the message box, and then click {ui("Upload a File")}.', media('Your screenshot of the plus button menu with Upload a File circled', True)),
-    'Choose the file on your computer and click <strong>Open</strong>.',
+    'Click the plus button on the left side of the message box.',
+    f'Click {ui("Upload a File")}.',
+    'Choose the file on your computer.',
+    'Click <strong>Open</strong>.',
     'Type a short message that explains the file, such as "Draft of my section."',
     f'Press {kbd("Enter")}.',
 )}
 {result('The file appears in the channel, and teammates can open or download it.')}
-{media('GIF of uploading a Word document to a files channel')}
 {note('You can also drag a file from your desktop or a folder and drop it into the chat area.')}
 {caution('Free Discord accounts have a file size limit, currently 10 MB per file. For large files, such as videos or big slide decks, upload them to OneDrive or Google Drive and paste the sharing link in Discord instead.')}
 
 <h2>Find files later</h2>
 {steps(
     'Click the <strong>Search</strong> box at the top-right of the window.',
-    'Type <strong>has:</strong> and click <strong>file</strong> in the list.',
+    'Type <strong>has:</strong> in the Search box.',
+    'Click <strong>file</strong> in the list.',
     f'Press {kbd("Enter")}.',
 )}
 {result('Discord lists every message in the server that includes a file, with the newest first.')}
-{media('Your screenshot of search results filtered to files', True)}
 {note('Ask your group to pin the final version of each file in the files channel so everyone uses the same copy.')}
 ''')
 
@@ -854,7 +849,7 @@ if __name__ == '__main__':
         with open(f, 'w', encoding='utf-8') as fh:
             fh.write(page(f, body, desc, draft))
     # Old addresses from the first draft redirect to the new pages
-    for old, new in {'create-account.html': 'getting-started.html', 'join-server.html': 'joining-a-server.html'}.items():
+    for old, new in {'create-account.html': 'getting-started.html', 'join-server.html': 'joining-a-server.html', 'what-is-discord.html': 'index.html'}.items():
         with open(old, 'w', encoding='utf-8') as fh:
             fh.write(f'<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url={new}">'
                      f'<link rel="canonical" href="{new}"><title>Moved</title></head><body><p>This page moved to <a href="{new}">{new}</a>.</p></body></html>')

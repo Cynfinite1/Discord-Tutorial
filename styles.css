@@ -65,7 +65,7 @@ img, video { max-width: 100%; height: auto; display: block; border-radius: 6px; 
 
 .main-col { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
 .topbar { display: none; }
-.content { width: 100%; max-width: calc(var(--read) + 4rem); margin: 0 auto; padding: 2.4rem 2rem 2rem; flex: 1; }
+.content { width: 100%; max-width: calc(var(--read) + 16rem); margin: 0 auto; padding: 2.4rem 2rem 2rem; flex: 1; }
 
 /* ---------- Text ---------- */
 .crumbs { font-size: .85rem; color: var(--muted); margin-bottom: 1.2rem; }
@@ -170,3 +170,17 @@ a.media-frame:hover { border-color: var(--blurple); }
   .facts th[scope="row"] { white-space: normal; width: 7rem; }
 }
 @media (prefers-reduced-motion: reduce) { .sidebar { transition: none; } }
+
+/* Homepage: section label under the tutorial title */
+.section-label { color: var(--heading); font-size: 1.35rem; font-weight: 800; margin: -.2rem 0 1.1rem; }
+
+/* Two-column steps: step text on the left, its image on the right */
+.steps-grid > li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 1.2rem; align-items: start; padding-top: .9rem; padding-bottom: .9rem; }
+.steps-grid > li::before { top: .9rem; }
+.steps-grid .step-text { padding-top: .05rem; }
+.steps-grid .media { margin: 0; max-width: none; }
+.step-media .media.placeholder { display: grid; align-content: center; min-height: 5.5rem; }
+.explain { text-align: center; margin: 1.1rem 0 .4rem; }
+@media (max-width: 700px) {
+  .steps-grid > li { grid-template-columns: 1fr; gap: .7rem; }
+}
