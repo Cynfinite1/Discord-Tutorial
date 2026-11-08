@@ -170,16 +170,16 @@ MEDIA = {
     '5.2.3': "The teammate's name in the list above the message box",
     '5.2.4': 'Finishing the message in the message box',
     '5.2.5': 'The message with the mention after pressing Enter',
-    '5.3.2': 'The tray icon (Inbox) at the top-right of the Discord window',
-    '5.3.3': 'The Mentions tab in the Inbox',
-    '5.3.4': 'The jump icon next to a mention in the Inbox',
-    '5.3.5': 'Opening a channel from the channel list',
-    '5.3.6': 'The pin icon at the top-right of the window',
-    '5.3.7': 'The Jump button next to a pinned message',
-    '5.3.8': 'The Search box at the top-right of the window',
-    '5.3.9': 'Typing deadline in the Search box',
-    '5.3.10': 'The search results after pressing Enter',
-    '5.3.11': 'Clicking a search result to jump to the message',
+    '5.3.1': 'The tray icon (Inbox) at the top-right of the Discord window',
+    '5.3.2': 'The Mentions tab in the Inbox',
+    '5.3.3': 'The jump icon next to a mention in the Inbox',
+    '5.3.4': 'Opening a channel from the channel list',
+    '5.3.5': 'The pin icon at the top-right of the window',
+    '5.3.6': 'The Jump button next to a pinned message',
+    '5.3.7': 'The Search box at the top-right of the window',
+    '5.3.8': 'Typing deadline in the Search box',
+    '5.3.9': 'The search results after pressing Enter',
+    '5.3.10': 'Clicking a search result to jump to the message',
     '5.4.1': 'Opening the #files-and-drafts channel',
     '5.4.2': 'The plus button on the left side of the message box',
     '5.4.3': 'Upload a File in the plus button menu',
@@ -189,7 +189,8 @@ MEDIA = {
     '5.4.7': 'The message and file in the channel after pressing Enter',
     '5.4.8': 'The Search box at the top-right of the window',
     '5.4.9': 'Typing has: in the Search box',
-    '5.4.10': 'The file filter in the Search box, with the message that includes the file',
+    '5.4.10': 'The has: file filter in the Search box after clicking file in the list',
+    '5.4.11': 'The search result with the message that includes the file after pressing Enter',
 }
 
 
@@ -825,7 +826,6 @@ PAGES['mentions.html'] = ('Mention a teammate, a role, or the whole server in Di
 )}
 {result('Your teammate receives a notification, and the message is highlighted for them.')}
 {note('When someone mentions you, the message has a yellow highlight and a yellow bar on its left edge, so you can spot it while scrolling.')}
-{media('Your screenshot of a highlighted message that mentions you')}
 
 <h2>Mention a group of people</h2>
 <p>Three special mentions reach more than one person:</p>
@@ -848,7 +848,6 @@ PAGES['missed-messages.html'] = ('Catch up on missed Discord messages with unrea
   <li>A {T('mention badge')} is a red circle with a number. It means someone mentioned you, and the number shows how many times.</li>
 </ul>
 <p>Check channels with a red badge first, because those messages are meant for you.</p>
-{media('Your screenshot of a server icon with a white dot and a red badge, and bold channel names', True)}
 
 <h2>Use the Inbox</h2>
 <p>The {T('Inbox')} collects recent mentions from every server in one list.</p>
