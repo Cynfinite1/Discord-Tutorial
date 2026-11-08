@@ -152,6 +152,7 @@ a.media-frame:hover { border-color: var(--blurple); }
 .pager a:hover { border-color: var(--blurple); }
 .pager small { display: block; font-weight: 600; color: var(--muted); font-size: .8rem; }
 .pager .next { text-align: right; grid-column: 2; }
+.facts + .pager { margin-top: 0; border-top: 0; }
 
 .site-footer { border-top: 1px solid var(--border); padding: 1.2rem 2rem; color: var(--muted); font-size: .85rem; text-align: center; }
 .site-footer p { margin: 0 auto; max-width: 70ch; }
